@@ -34,7 +34,7 @@ class Letters {
       if(l.y > targetPoint + targetSize){
         this.array.splice(i, 1);
         console.log("too late");
-        sounds.missSound.play();
+        sounds.playMiss();
         misses += 1;
       }
     }
@@ -53,12 +53,12 @@ class Letters {
           if(distance == 0){
            setBanner("Perfect!"); 
           }
-          sounds.hitSound.play();
+          sounds.playHit(distance);
           hits += 1;
           points += 1;
         }else{
           console.log("too early");
-          sounds.missSound.play();
+          sounds.playMiss();
           misses += 1;
         }
         

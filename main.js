@@ -4,7 +4,7 @@ ctx.font = '48px Arial';
 var screenHeight = canvas.height;
 var screenWidth = canvas.width;
 var quit = false;
-
+var pause = false;
 var targetPoint = 200;
 var targetSize = 60;
 var hits = 0;
@@ -17,12 +17,17 @@ window.onkeyup = function(e)
 		switch(e.keyCode)
 		{		
       case 27: // 'esc'
-       console.log("escape");
-       quit = true;
-       break;
+        console.log("escape");
+        quit = true;
+        break;
+
+      case 13: 
+        console.log("enter");
+        pause = true;
+        break;
       default:
         letters.processKey(e.key);
-       // console.log(" you pressed some other key. it's number was "+e.keyCode+" "+e.key);
+        // console.log(" you pressed some other key. it's number was "+e.keyCode+" "+e.key);
     }
     e.preventDefault();
   };
@@ -70,7 +75,7 @@ function render(){
   }else{
     ctx.fillStyle = "red";
   }
-  ctx.fillText(health, screenWidth - 60, screenHeight - 2);
+  ctx.fillText(health, screenWidth - 80, screenHeight - 2);
 
 
   ctx.fillStyle = "white";
@@ -148,6 +153,7 @@ function setLevel(){
     wordsThisLevel = 0;
     words = levels[currentLevel]["words"];
     setBanner("Level "+(currentLevel+1));
+    sounds.playNextLevel();
   }
   if(wordsThisLevel == 1){
     setBanner(levels[currentLevel]["message"]);
@@ -156,7 +162,13 @@ function setLevel(){
 }
 
 function mainLoop(){
-  gameTime += 1;
+  if(!pause){
+   gameTime += 1;
+  
+   //move letters
+   letters.tick(); 
+  }
+  
   //draw things
   render();
 
@@ -175,9 +187,7 @@ function mainLoop(){
       letters.add(new Letter(c, x, i));
     }
     
-  }
-  
-  letters.tick();
+  }  
 
   if(getHealth() < -4){
     alert("Game Over");
