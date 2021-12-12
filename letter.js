@@ -34,6 +34,7 @@ class Letters {
       if(l.y > targetPoint + targetSize){
         this.array.splice(i, 1);
         console.log("too late");
+        recordMiss();
         sounds.playMiss();
         misses += 1;
       }
@@ -58,8 +59,7 @@ class Letters {
           points += 1;
         }else{
           console.log("too early");
-          sounds.playMiss();
-          misses += 1;
+          recordMiss();
         }
         
         this.array.splice(i, 1);
