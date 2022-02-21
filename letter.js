@@ -36,7 +36,6 @@ class Letters {
         console.log("too late");
         recordMiss();
         sounds.playMiss();
-        misses += 1;
       }
     }
   }
@@ -52,16 +51,17 @@ class Letters {
 
         if(distance < (targetSize / 2)){
           if(distance == 0){
-           setBanner("Perfect!"); 
+            banners.setBanner("Perfect!");           
           }
           sounds.playHit(distance);
-          hits += 1;
+          curLevel.recordHit();
           points += 1;
         }else{
           console.log("too early");
           recordMiss();
         }
         
+        // remove this entry from the array
         this.array.splice(i, 1);
         break;
       }

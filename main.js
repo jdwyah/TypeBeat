@@ -7,19 +7,27 @@ var quit = false;
 var pause = false;
 var targetPoint = screenHeight * .75;
 var targetSize = 60;
-var hits = 0;
-var misses = 0;
 var points = 0;
 var health = 8;
 var dead = false;
 var gameTime = 0;
-var currentLevel = -1;
 
 /*
 - https://freemusicarchive.org/genre/Techno
 - add BPM to each level & music, find matches. 
 
 - l2 = exist:fj new: dks
+
+
+TODO
+- get rid of wordsThisLevel
+- change nextWord to get levels.getNextWord()
+- add levels.recordWordCompletion()
+- make level trigger nextLevel functionality
+- cooler graphcics
+- fire? https://slicker.me/javascript/fire/fire.htm
+- fireworks? http://slicker.me/javascript/fireworks.htm
+
 */
 
 window.onkeyup = function(e)
@@ -55,7 +63,7 @@ var banners = new Banners();
 
 function recordMiss(){
   sounds.playMiss();
-  misses += 1;
+  curLevel.recordMiss();
   health -= 1;
 }
 function render(){
@@ -102,6 +110,7 @@ function getRandomInt(max) {
   return Math.floor(Math.random() * max);
 }
 
+// The order of the keys from left to right on the keyboard
 var xOrder = ['q', 'a', 'z', 'w', 's', 'x', 'e', 'd', 'c', 'r', 'f', 'v', 't', 'g', 'b', 'y', 'h', 'n', 'u', 'j', 'm', 'i', 'k', ',', 'o', 'l','.', 'p', ';', '/'];
 
 
@@ -111,80 +120,23 @@ for(var i=0; i < xOrder.length; i++){
   xPos[xOrder[i]] = i/30.0;
 }
 
-var levels = [
 
-  {
-    speed: 1,
-    words: ['f', 'j','ff','jj','fff','jjj','fjf'],
-    passAt: 10,
-    message: "Let's go!",
-  },
-  {
-    speed: 1,
-    words: ['ddd', 'kkk', 'k', 'd', 'dkd', 'kd', 'dk', 'jk', 'df', 'ffk', 'jdd'],
-    message: "Here comes d and k!",
-  },
-  {
-    speed: 1,
-    words: ['a', 'aa', 's', 'ss', 'ddd', 'fff', 'df', 'ds', 'as', 'ds', 'dfd', 'asa'],
-    message: "Left Hand Boogie!",
-  },
-  {
-    speed: 1,
-    words: ['jjj', 'kkk', 'lll', ';', 'jkl;', ';lkj', 'jkj', 'klk', 'jlk'],
-    message: "Right Hand Boogie!",
-  },
-  {
-    speed: 1,
-    words: ['asdf', 'jkl', 'fjf', 'dad', 'fad', 'jad', 'lad', 'sssd', 'jjkl'],
-    message: "Home row madness!",
-  },
-  {
-    speed: 1,
-    words: ['g', 'h', 'hh', 'ghg', 'hgh', 'jfh', 'ghj', 'dk', 'had', 'lad', 'ggg'],
-    message: "G & H! Move it!",
-  },
-  {
-    speed: 1,
-    words: ['tyty', 'ttt', 'yyy', 't', 'y', 'yyyy', 'tttt', 'dk', 'had', 'taly', 'yay'],
-    message: "T & Y! Index fingers go!",
-  },  
-  {
-    speed: 1,
-    words: ['rrr', 'uuu', 'uuuy', 'rrrt', 'ruty', 'suds', 'fuj', 'say', 'kay', 'kary', 'ray'],
-    message: "R & U!",
-  },  
-  {
-    speed: 1,
-    words: ['nnn', 'nnnj', 'fnf', 'fjf', 'ruty', 'fun', 'fuj', 'sun', 'nat', 'tan', 'yay'],
-    message: "N!",
-  },  
-  {
-    speed: 1,
-    words: ['tree', 'what', 'the', 'rag', 'hugs', 'you', 'fang', 'your'],
-    message: "roh roh",
-  },
-]
-
-
-var wordsThisLevel = 0;
 var sounds = new Sounds();
 // this is the what needs to happen every loop
 
 function setLevel(){
-  if(currentLevel < 0 || wordsThisLevel > 10){
-    currentLevel += 1;
-    hits = 0;
-    misses = 0;
-    wordsThisLevel = 0;
-    words = levels[currentLevel]["words"];
-    banners.setBanner("Level "+(currentLevel+1));
+  curLevel = levels.getCurrent();
+  window.curLevel = curLevel;   
+
+  if(curLevel.isFinished()){
+    levels.nextLevel();
     sounds.playNextLevel();
     health += 2;
   }
-  if(wordsThisLevel == 1){
-    banners.setBanner(levels[currentLevel]["message"]);
-  }
+  curLevel = levels.getCurrent();
+  window.curLevel = curLevel;   
+
+
 
 }
 
@@ -203,8 +155,9 @@ function mainLoop(){
 
   // if(gameTime % (getRandomInt(3)*30) == 0){
   if(gameTime % 180 == 0){
-    nextWord =  words[Math.floor(Math.random()*words.length)];
-    wordsThisLevel += 1;
+
+    // Pick random word from words
+    nextWord =  curLevel.getNextWord();
 
     console.log("next word: "+nextWord);
     banners.setNextWordBanner(nextWord);
